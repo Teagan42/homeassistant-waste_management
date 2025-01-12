@@ -51,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, config, add_entities):
 
 
 class WasteManagementSensorEntity(SensorEntity):
-    def __init__(self, hass, name, username, password, account_id, service_i, offset=None):
+    def __init__(self, hass, name, username, password, account_id, service_id, offset=None):
 
         self._attr_has_entity_name = True
         self.hass: HomeAssistant = hass
