@@ -3,7 +3,7 @@ import datetime
 import logging
 
 import homeassistant
-from .const import CONF_ACCOUNT, CONF_SERVICES
+from .const import CONF_ACCOUNT, CONF_SERVICES, CONF_OFFSET_DAYS
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.exceptions import PlatformNotReady
@@ -41,6 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, config, add_entities):
                     config_data[CONF_PASSWORD],
                     config_data[CONF_ACCOUNT],
                     svc_id,
+                    offset=config_data[CONF_OFFSET_DAYS],
                 )
             )
         add_entities(entities, True)
@@ -50,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, config, add_entities):
 
 
 class WasteManagementSensorEntity(SensorEntity):
-    def __init__(self, hass, name, username, password, account_id, service_id):
+    def __init__(self, hass, name, username, password, account_id, service_i, offset=None):
 
         self._attr_has_entity_name = True
         self.hass: HomeAssistant = hass
@@ -58,6 +59,7 @@ class WasteManagementSensorEntity(SensorEntity):
         self.password = password
         self.account_id = account_id
         self.service_id = service_id
+        self.offset = offset if offset is not None else 0
 
         self._attr_name = name
         self._attr_unique_id = f"{account_id}_{service_id}"
@@ -90,5 +92,6 @@ class WasteManagementSensorEntity(SensorEntity):
         proposed_pickup = pickup[0].astimezone()
         if proposed_pickup.date() < today and len(pickup) > 1:
             proposed_pickup = pickup[1].astimezone()
+        proposed_pickup = proposed_pickup + datetime.timedelta(days=self.offset)
         self._attr_native_value = proposed_pickup
         self._attr_available = True
